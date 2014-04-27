@@ -11,6 +11,9 @@
  * 4) @mentions - Always starts with an '@' and ends when hitting a non-word character.
  * 5) emoticons - Are letters, no longer than 15 characters, contained in parenthesis.
  *    I am ssuming they don't contain numbers or other ASCII symbols.
+ * 6) links - I am assuming they start with http or https. I am also assuming they end
+ *    the string or there is a space after the url. We could improve this algorithm by
+ *    catching the case where there is a . at the end of the url.
  */
 
 import java.util.*;
@@ -23,12 +26,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.Jsoup;
 
 public class ChatStrings {
-    
-    private enum TypeOfAnnotation {
-        MENTION,
-        EMOTICON,
-        LINK
-    }
   
     /*
     * Data we'll be parsing
@@ -157,7 +154,8 @@ public class ChatStrings {
                         validEmoticon = false;
                     }
                     
-                    if (builder.length() > 0 && validEmoticon) {
+                    // emoticons must be at most 15 characters long
+                    if (builder.length() > 0 && builder.length() < 16 && validEmoticon) {
                         String newEmoticon = builder.toString();
                         wrapper.setEmoticon(newEmoticon);
                     }
@@ -202,8 +200,6 @@ public class ChatStrings {
             }
         }
     }
-    
-//    private void parseAnnotation(String s, int index, TypeOfAnnotation type)
 
     private boolean isAt(char c) {
         return c == '@';
@@ -227,23 +223,6 @@ public class ChatStrings {
 
     private boolean isAChar(char c) {
         return ( (65 <= c && c <= 90) || (97 <= c && c <= 122) );
-    }
-
-    private boolean isANumber(char c) {
-        return 48 <= c && c <= 57;
-    }
-
-    private boolean isACharOrNum(char c) {
-        return isAChar(c) || isANumber(c);
-    }
-
-    private boolean isASymbol(char c) {
-        return ( (33 <= c && c <= 47) || (58 <= c && c <= 64) 
-            || (91 <= c && c <= 96) || (123 <= c && c <= 126));
-    }
-
-    private boolean isACharOrNumOrSym(char c) {
-        return isAChar(c) || isANumber(c) || isASymbol(c);
     }
 
     /**
